@@ -79,7 +79,6 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker tag your-image-name:latest ${{ secrets.DOCKERHUB_USERNAME }}/data_pipeline:${{ github.ref_name }}
           docker push ${{ vars.DOCKERHUB_USERNAME }}/data_pipeline:${{ github.ref_name }}
 
       #- name: Set up JDK 17
