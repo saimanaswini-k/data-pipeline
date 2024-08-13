@@ -41,7 +41,7 @@ jobs:
 
       - name: Build the code
         run: mvn clean install -DskipTests
-        
+
       #- name: Execute coverage report
       #  run: mvn clean scoverage:report
 
@@ -84,6 +84,10 @@ jobs:
         run: |
           cd jobs-distribution
           mvn package -Pbuild-docker-image -Drelease-version=${{ github.ref_name }} 
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/image-name:${{ github.ref_name }}
           
      
       #- name: Set up JDK 17
