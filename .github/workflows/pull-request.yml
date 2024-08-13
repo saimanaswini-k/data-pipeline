@@ -87,7 +87,7 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push data-pipeline:${{ github.ref_name }}
+          docker push docker.io/library/data-pipeline:${{ github.ref_name }}
           
      
       #- name: Set up JDK 17
