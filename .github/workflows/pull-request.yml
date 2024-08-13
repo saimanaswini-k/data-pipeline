@@ -62,7 +62,7 @@ jobs:
 
       
       - name: Set up Maven 3.6
-        uses: actions/setup-maven@v3
+        uses: actions/setup-maven@v2
         with:
           maven-version: '3.6.3'
 
