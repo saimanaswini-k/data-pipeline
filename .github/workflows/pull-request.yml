@@ -39,14 +39,14 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
 
-      - name: Execute coverage report
-        run: mvn clean scoverage:report
+      #- name: Execute coverage report
+      #  run: mvn clean scoverage:report
 
-      - name: Save test results
-        if: always()
-        run: |
-          mkdir -p ~/test-results/junit/
-          find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+      #- name: Save test results
+      #  if: always()
+      #  run: |
+      #    mkdir -p ~/test-results/junit/
+      #    find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -54,11 +54,11 @@ jobs:
           path: ~/.m2
           key: lern-jobs-dependency-cache-${{ hashFiles('pom.xml') }}
 
-      - name: Store test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: ~/test-results
+      #- name: Store test results
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: test-results
+      #    path: ~/test-results
 
       
       - name: Set up Maven 3.6
