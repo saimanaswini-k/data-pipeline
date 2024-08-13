@@ -68,7 +68,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          cd jobs
+          cd jobs-distribution
           mvn package -Pbuild-docker-image -Drelease-version=${{ github.ref_name }}
           
       - name: Login to Docker Hub
@@ -79,7 +79,7 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/data_pipeline:${{ github.ref_name }}
+           docker push ${{ vars.DOCKERHUB_USERNAME }}/data_pipeline:${{ github.ref_name }}
 
       #- name: Set up JDK 17
       #  uses: actions/setup-java@v4
