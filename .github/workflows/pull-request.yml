@@ -61,10 +61,7 @@ jobs:
       #    path: ~/test-results
 
       
-    - name: Set up Maven
-      uses: actions/setup-maven@v2
-      with:
-        maven-version: '3.6.3'
+   
 
       - name: Verify Maven version
         run: mvn -v
