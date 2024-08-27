@@ -3,20 +3,11 @@ name: Build and Test
 on:
   push:
     tags:
-      - '*' 
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+      - '*'
 
 jobs:
-  Build-and-push-images:
+  unit-tests:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
     
     steps:
       - name: Set up JDK 11
@@ -35,7 +26,6 @@ jobs:
           key: lern-jobs-dependency-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             lern-jobs-dependency-cache-
-
       - name: Install ImageMagick
         run: |
           sudo apt-get update || sudo apt-get update
@@ -44,14 +34,14 @@ jobs:
       - name: Build the code
         run: mvn clean install -DskipTests
 
-      - name: Execute coverage report
-        run: mvn clean scoverage:report
+      #- name: Execute coverage report
+      #  run: mvn clean scoverage:report
 
-      - name: Save test results
-        if: always()
-        run: |
-          mkdir -p ~/test-results/junit/
-          find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+      #- name: Save test results
+      #  if: always()
+      #  run: |
+      #    mkdir -p ~/test-results/junit/
+      #    find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -59,38 +49,37 @@ jobs:
           path: ~/.m2
           key: lern-jobs-dependency-cache-${{ hashFiles('pom.xml') }}
 
-      - name: Store test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: ~/test-results
-
-      #- name: Set up JDK 17
-      #  uses: actions/setup-java@v4
+      #- name: Store test results
+      #  uses: actions/upload-artifact@v3
       #  with:
-      #    distribution: 'temurin'
-      #    java-version: '17'
+      #    name: test-results
+      #    path: ~/test-results
 
-      #- name: Run SonarQube analysis
-      #  env:
-      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #  run: |
-      #      mvn verify -DskipTests=true sonar:sonar -Dlog4j.configuration=./logs sonar:sonar -Dsonar.projectKey=saimanaswini-k_data-pipeline -Dsonar.organization=saimanaswini-k-1 -Dsonar.host.url=https://sonarcloud.io -Dsonar.java.binaries=$(find . -path '*/build/classes/java' | xargs | tr ' ' ',') -Dsonar.coverage.exclusions=**/notification-sdk/**,**/notification/domain/** -Dsonar.test.exclusions=**/notification-sdk/** -Dsonar.exclusions=**/**.java -Dsonar.scala.coverage.reportPaths=/home/circleci/lern/target/scoverage.xml
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.2.1
+        with:
+          maven-version: '3.6.3'
+          java-version: '11'
 
-    
+      - name: Verify Maven version
+        run: mvn -v
 
-      - name: Build Docker Image
-
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/your-image-name:${{ github.ref_name }} .
-
-      - name: Authenticate with GHCR
-        uses: docker/login-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_LOGIN }}
 
-      - name: Push Docker Image to GHCR
+      - name: Build Docker Image
         run: |
-          docker push ghcr.io/${{ github.repository }}/your-image-name:${{ github.ref_name }}
+          cd jobs-distribution
+          mvn package -Pbuild-docker-image -Drelease-version=${{ github.ref_name }}
+
+      - name: Tag Docker Image
+        run: |
+          docker tag data-pipeline:${{ github.ref_name }} ghcr.io/${{ github.actor }}/data-pipeline:${{ github.ref_name }}
+
+      - name: Push Docker Image to GitHub Container Registry
+        run: |
+          docker push ghcr.io/${{ github.actor }}/data-pipeline:${{ github.ref_name }}
